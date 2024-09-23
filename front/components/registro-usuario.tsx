@@ -35,21 +35,42 @@ export function RegistroUsuario() {
     return true
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setErro('')
-    setSucesso(false)
-
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErro('');
+    setSucesso(false);
+  
     if (validarFormulario()) {
-      // Simula o envio para um servidor
-      console.log('Dados de registro:', { email, senha })
-      // Limpa os campos e mostra mensagem de sucesso
-      setEmail('')
-      setSenha('')
-      setConfirmacaoSenha('')
-      setSucesso(true)
+      try {
+        // Simula o envio para um servidor
+        const response = await fetch('http://localhost:3001/registrar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, senha }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Erro ao registrar, tente novamente.');
+        }
+  
+        const data = await response.json();
+        console.log('Dados de registro:', data);
+        
+        // Limpa os campos e mostra mensagem de sucesso
+        setEmail('');
+        setSenha('');
+        setConfirmacaoSenha('');
+        setSucesso(true);
+      } catch (error) {
+        setErro( error.message || 'Ocorreu um erro inesperado.');
+      }
+    } else {
+      setErro('Por favor, corrija os erros no formulário.'); // Exemplo de mensagem de erro
     }
-  }
+  };
+  
 
   return (
     <div className="flex justify-center items-center min-h-screen ">
