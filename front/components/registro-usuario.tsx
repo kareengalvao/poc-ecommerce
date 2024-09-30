@@ -1,134 +1,118 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CheckCircle2, AlertCircle } from "lucide-react"
+import React, { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export function RegistroUsuario() {
-  const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
-  const [confirmacaoSenha, setConfirmacaoSenha] = useState('')
-  const [erro, setErro] = useState('')
-  const [sucesso, setSucesso] = useState(false)
+export function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const validarFormulario = () => {
-    if (!email || !senha || !confirmacaoSenha) {
-      setErro('Todos os campos são obrigatórios.')
-      return false
+  const validateForm = () => {
+    if (!email || !password) {
+      setError("Both fields are required");
+      return false;
     }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setErro('Por favor, insira um email válido.')
-      return false
-    }
-    if (senha.length < 6) {
-      setErro('A senha deve ter pelo menos 6 caracteres.')
-      return false
-    }
-    if (senha !== confirmacaoSenha) {
-      setErro('As senhas não coincidem.')
-      return false
-    }
-    return true
-  }
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErro('');
-    setSucesso(false);
-  
-    if (validarFormulario()) {
+    setError("");
+    setSuccess(false);
+
+    if (validateForm()) {
       try {
-        // Simula o envio para um servidor
-        const response = await fetch('http://localhost:3001/registrar', {
+        const response = await fetch('http://localhost:3001/login', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email, senha }),
+          body: JSON.stringify({ email, password })
         });
-  
+
         if (!response.ok) {
-          throw new Error('Erro ao registrar, tente novamente.');
+          throw new Error('Server error');
         }
-  
+
         const data = await response.json();
-        console.log('Dados de registro:', data);
-        
-        // Limpa os campos e mostra mensagem de sucesso
-        setEmail('');
-        setSenha('');
-        setConfirmacaoSenha('');
-        setSucesso(true);
+        console.log('Server response:', data);
+
+        setEmail("");
+        setPassword("");
+        setSuccess(true);
       } catch (error) {
-        setErro( error.message || 'Ocorreu um erro inesperado.');
+        console.log(error);
+        setError('Server error');
       }
-    } else {
-      setErro('Por favor, corrija os erros no formulário.'); // Exemplo de mensagem de erro
     }
   };
-  
 
   return (
-    <div className="flex justify-center items-center min-h-screen ">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Criar Conta</CardTitle>
-          <CardDescription>Registre-se para acessar nossa plataforma.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+    <Card className="mx-auto max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">Login</CardTitle>
+        <CardDescription>
+          Enter your email below to login to your account
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="seu@email.com"
+                placeholder="m@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="senha">Senha</Label>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+                <Link href="#" className="ml-auto inline-block text-sm underline">
+                  Forgot your password?
+                </Link>
+              </div>
               <Input
-                id="senha"
+                id="password"
                 type="password"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmacao-senha">Confirmar Senha</Label>
-              <Input
-                id="confirmacao-senha"
-                type="password"
-                value={confirmacaoSenha}
-                onChange={(e) => setConfirmacaoSenha(e.target.value)}
-              />
-            </div>
-            <Button type="submit" className="w-full">Registrar</Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col">
-          {erro && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Erro</AlertTitle>
-              <AlertDescription>{erro}</AlertDescription>
-            </Alert>
-          )}
-          {sucesso && (
-            <Alert className="mt-4">
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertTitle>Sucesso</AlertTitle>
-              <AlertDescription>Sua conta foi criada com sucesso!</AlertDescription>
-            </Alert>
-          )}
-        </CardFooter>
-      </Card>
-    </div>
-  )
+            {error && <div className="text-red-500">{error}</div>}
+            {success && <div className="text-green-500">Login successful!</div>}
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+            <Button variant="outline" className="w-full">
+              Login with Google
+            </Button>
+          </div>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="#" className="underline">
+              Sign up
+            </Link>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
 }
